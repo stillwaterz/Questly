@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import uuid
 
 class PersonaSection(BaseModel):
@@ -18,6 +18,19 @@ class RealityCheckSection(BaseModel):
     title: str = "The Reality Check"
     description: str
 
+class SubjectRecommendations(BaseModel):
+    essential: List[str]
+    recommended: List[str] 
+    aps_range: str
+    min_aps: int
+
+class Institution(BaseModel):
+    institution: str
+    programme: str
+    duration: str
+    aps_required: str
+    location: str
+
 class CareerPath(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     title: str
@@ -28,6 +41,10 @@ class CareerPath(BaseModel):
     skills: List[str]
     timeToMastery: str
     averageSalary: str
+    subjects: Optional[SubjectRecommendations] = None
+    institutions: Optional[List[Institution]] = None
+    imageUrl: Optional[str] = None
+    apsExplanation: Optional[str] = None
 
 class CareerAnalysisRequest(BaseModel):
     userInput: str
