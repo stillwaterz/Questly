@@ -239,6 +239,19 @@ function App() {
     );
   };
 
+  if (isAuthLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-sky-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+            <span className="text-white font-bold text-lg">Q</span>
+          </div>
+          <p className="text-slate-600">Initializing Questly...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       <Navbar 
