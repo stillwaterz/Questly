@@ -3,6 +3,7 @@ import os
 import json
 import logging
 from typing import List, Dict, Any
+from .sa_data import get_institutions_for_career, get_subjects_for_career, APS_EXPLANATION
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -29,49 +30,76 @@ class GeminiService:
                 generation_config=genai.types.GenerationConfig(
                     temperature=0.8,
                     top_p=0.9,
-                    max_output_tokens=8000,
+                    max_output_tokens=6000,
                 )
             )
             
             # Parse the response
             career_data = self._parse_gemini_response(response.text)
-            return career_data
+            
+            # Enhance with SA-specific data
+            enhanced_careers = self._enhance_with_sa_data(career_data)
+            
+            return enhanced_careers
             
         except Exception as e:
             logger.error(f"Error analyzing career interests: {str(e)}")
             # Return fallback mock data in case of API failure
             return self._get_fallback_careers(user_input)
     
+    def generate_career_image(self, career_title: str) -> str:
+        """
+        Generate line art image of Black African professional
+        """
+        try:
+            image_prompt = f"""
+Create a professional line art illustration of a Black African person working as a {career_title}. 
+The image should be:
+- Simple black line art on white background
+- Professional and inspiring
+- Showing the person engaged in their work
+- Minimalist style, suitable for career guidance
+- Representing South African professional excellence
+            """
+            
+            response = self.model.generate_content([image_prompt])
+            
+            # Note: Gemini 1.5 Flash primarily does text generation
+            # For actual image generation, we'd need to use a different model or service
+            # For now, return placeholder
+            return f"https://api.dicebear.com/7.x/personas/svg?seed={career_title.replace(' ', '')}"
+            
+        except Exception as e:
+            logger.error(f"Error generating image: {str(e)}")
+            return f"https://api.dicebear.com/7.x/personas/svg?seed={career_title.replace(' ', '')}"
+    
     def _build_career_analysis_prompt(self, user_input: str) -> str:
         """
-        Build a comprehensive prompt for career analysis
+        Build a comprehensive prompt for South African career analysis
         """
         return f"""
-You are an expert career counselor and AI advisor. Based on the user's interests and passions, generate 2-3 personalized career paths that align with their stated interests.
+You are a South African career counselor specializing in guiding high school students toward successful careers. 
+Based on the user's interests, generate 2 personalized career paths relevant to South Africa and Africa.
 
 User Input: "{user_input}"
 
-For each career path, create a detailed analysis with the following sections:
+For each career path, create a CONCISE analysis with these sections:
 
-1. **Career Title**: A specific, realistic job title
-2. **Persona Section**: "Meet Your Future Self" - Create a vivid persona with a specific name, age, company, and achievement story that shows impact and success
-3. **Day in Life**: "A Day in Your Life" - Detailed hour-by-hour schedule showing what a typical workday looks like
-4. **Weekend Quest**: "Your Weekend Quest" - A specific, actionable project they can do this weekend to start building relevant skills
-5. **Reality Check**: "The Reality Check" - Honest assessment of challenges, education requirements, competition, and realistic salary expectations
-6. **Key Skills**: List 4-6 essential skills needed
-7. **Time to Mastery**: Realistic timeline to become proficient
-8. **Average Salary Range**: Current market salary range
+1. **Career Title**: Specific job title relevant to SA market
+2. **Persona**: Brief inspiring story (2-3 sentences) featuring a Black African professional with a South African name, showing their impact and success
+3. **Day in Life**: Concise description (2-3 sentences) of a typical workday
+4. **Weekend Quest**: Actionable project with a specific YouTube channel or online course link (must include actual working URL)
+5. **Reality Check**: Honest 2-sentence assessment of challenges and salary expectations in South African Rand
 
 **Important Guidelines:**
-- Make personas feel real and inspiring with specific names, companies, and achievements
-- Include specific companies, tools, and technologies where relevant
-- Weekend quests should be immediately actionable for a high school student
-- Reality checks should be honest about challenges while remaining encouraging
-- Salary ranges should be accurate for 2024-2025 market
-- Focus on emerging trends and future opportunities in each field
+- Use South African names and contexts
+- Include salary ranges in South African Rand (R)
+- Focus on opportunities available in South Africa and Africa
+- Keep responses concise but inspiring
+- Weekend Quest MUST include real YouTube links or course URLs
+- Highlight transformation and empowerment themes
 
-**Response Format:**
-Return your response as a valid JSON array with exactly this structure:
+**Response Format - JSON Array:**
 
 [
   {{
@@ -79,27 +107,27 @@ Return your response as a valid JSON array with exactly this structure:
     "title": "Career Title",
     "persona": {{
       "title": "Meet Your Future Self",
-      "description": "Detailed persona story with name, company, age, and specific achievements"
+      "description": "2-3 sentence inspiring story with South African name and context"
     }},
     "dayInLife": {{
-      "title": "A Day in Your Life", 
-      "description": "Hour-by-hour detailed schedule of a typical workday"
+      "title": "A Day in Your Life",
+      "description": "2-3 sentence description of typical workday"
     }},
     "weekendQuest": {{
-      "title": "Your Weekend Quest",
-      "description": "Specific actionable project for this weekend with clear steps"
+      "title": "Your Weekend Quest", 
+      "description": "Actionable project description with YouTube link: https://youtube.com/watch?v=EXAMPLE or course link"
     }},
     "realityCheck": {{
       "title": "The Reality Check",
-      "description": "Honest assessment of challenges, requirements, and expectations"
+      "description": "2 sentence honest assessment with SA Rand salary range"
     }},
-    "skills": ["Skill 1", "Skill 2", "Skill 3", "Skill 4"],
-    "timeToMastery": "X-Y years",
-    "averageSalary": "$X,XXX - $X,XXX"
+    "skills": ["Essential Skill 1", "Essential Skill 2", "Essential Skill 3"],
+    "timeToMastery": "X years",
+    "averageSalary": "R XXX,XXX - R XXX,XXX"
   }}
 ]
 
-Generate 2-3 career paths that best match the user's interests. Make each one distinct and compelling.
+Generate exactly 2 career paths. Keep each section concise but impactful.
 """
 
     def _parse_gemini_response(self, response_text: str) -> List[Dict[str, Any]]:
@@ -131,32 +159,62 @@ Generate 2-3 career paths that best match the user's interests. Make each one di
             logger.error(f"Response text: {response_text[:500]}...")
             raise
     
+    def _enhance_with_sa_data(self, career_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Enhance career data with South African specific information
+        """
+        enhanced_careers = []
+        
+        for career in career_data:
+            # Get SA institutions and subjects
+            institutions = get_institutions_for_career(career['title'])
+            subjects = get_subjects_for_career(career['title'])
+            
+            # Generate career image
+            image_url = self.generate_career_image(career['title'])
+            
+            enhanced_career = {
+                **career,
+                'institutions': institutions,
+                'subjects': subjects,
+                'imageUrl': image_url,
+                'apsExplanation': APS_EXPLANATION
+            }
+            
+            enhanced_careers.append(enhanced_career)
+        
+        return enhanced_careers
+    
     def _get_fallback_careers(self, user_input: str) -> List[Dict[str, Any]]:
         """
         Provide fallback career suggestions if API fails
         """
         return [
             {
-                "id": "fallback-1",
-                "title": "Technology Consultant",
+                "id": "fallback-sa-1",
+                "title": "Software Developer",
                 "persona": {
                     "title": "Meet Your Future Self",
-                    "description": "You're Jordan Kim, a 29-year-old Senior Technology Consultant at Deloitte. You help Fortune 500 companies modernize their technology infrastructure and digital processes. Your recent project saved a retail client $2M annually through automation."
+                    "description": "You're Nomsa Mbeki, a 27-year-old Senior Software Developer at Naspers in Cape Town. You built the mobile banking app used by 2 million South Africans, helping bridge the digital divide and provide financial inclusion across rural communities."
                 },
                 "dayInLife": {
                     "title": "A Day in Your Life",
-                    "description": "8:00 AM: Review client requirements and project updates. 9:30 AM: Client video call discussing system architecture. 11:00 AM: Collaborate with development team on solutions. 1:00 PM: Lunch and networking. 2:30 PM: Technical documentation and analysis. 4:00 PM: Stakeholder presentation on recommendations. 6:00 PM: Research emerging technologies and trends."
+                    "description": "9:00 AM: Stand-up meeting with your agile team. 10:00 AM-12:00 PM: Coding new features using React and Node.js. 2:00 PM-5:00 PM: Code reviews and mentoring junior developers from previously disadvantaged backgrounds."
                 },
                 "weekendQuest": {
                     "title": "Your Weekend Quest",
-                    "description": "Create a simple business process automation using tools like Zapier or Microsoft Power Automate. Choose a repetitive task (like organizing emails or social media posting) and automate it. Document your process and share it on LinkedIn to start building your consulting portfolio."
+                    "description": "Build a simple website using HTML, CSS, and JavaScript. Follow this tutorial: https://youtube.com/watch?v=mU6anWqZJcc - FreeCodeCamp's Responsive Web Design course. Upload your project to GitHub Pages."
                 },
                 "realityCheck": {
                     "title": "The Reality Check",
-                    "description": "Technology consulting requires strong analytical and communication skills, plus continuous learning as technologies evolve rapidly. Entry-level positions often involve significant travel and long hours during project implementations. However, salaries start around $75,000-$95,000 with rapid growth potential."
+                    "description": "High demand in SA with starting salaries R300,000-R500,000. Requires dedication to continuous learning as technology evolves rapidly."
                 },
-                "skills": ["Problem Solving", "Communication", "Technical Analysis", "Project Management"],
+                "skills": ["JavaScript", "React", "Python", "Problem Solving"],
                 "timeToMastery": "3-4 years",
-                "averageSalary": "$85,000 - $150,000"
+                "averageSalary": "R400,000 - R800,000",
+                "institutions": get_institutions_for_career("Software Developer"),
+                "subjects": get_subjects_for_career("Software Developer"),
+                "imageUrl": "https://api.dicebear.com/7.x/personas/svg?seed=SoftwareDeveloper",
+                "apsExplanation": APS_EXPLANATION
             }
         ]

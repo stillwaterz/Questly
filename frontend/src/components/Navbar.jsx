@@ -1,0 +1,151 @@
+import React, { useState } from 'react';
+import { Button } from './ui/button';
+import { Menu, X, User, LogOut } from 'lucide-react';
+
+const Navbar = ({ user, onLogin, onLogout }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleLogin = () => {
+    // Simulate Google OAuth login
+    const mockUser = {
+      name: "Thabo Mthembu",
+      email: "thabo@gmail.com",
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
+    };
+    onLogin(mockUser);
+  };
+
+  return (
+    <nav className="bg-white border-b border-slate-200 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          {/* Logo */}
+          <div className="flex items-center">
+            <div className="flex-shrink-0 flex items-center">
+              <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-sky-500 rounded-xl flex items-center justify-center">
+                <span className="text-white font-bold text-lg">Q</span>
+              </div>
+              <div className="ml-3">
+                <span className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent">
+                  Questly
+                </span>
+                <div className="text-xs text-slate-500 -mt-1">Career Discovery for Africa</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8">
+            <a href="#home" className="text-slate-700 hover:text-emerald-600 font-medium transition-colors">
+              Home
+            </a>
+            <a href="#about" className="text-slate-700 hover:text-emerald-600 font-medium transition-colors">
+              About
+            </a>
+            <a href="#contact" className="text-slate-700 hover:text-emerald-600 font-medium transition-colors">
+              Contact Us
+            </a>
+            
+            {user ? (
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2">
+                  <img 
+                    src={user.avatar} 
+                    alt={user.name}
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <span className="text-sm font-medium text-slate-700">{user.name}</span>
+                </div>
+                <Button
+                  onClick={onLogout}
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Sign Out
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={handleLogin}
+                className="bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-600 hover:to-sky-600 text-white"
+              >
+                <User className="w-4 h-4 mr-2" />
+                Sign in with Google
+              </Button>
+            )}
+          </div>
+
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-slate-600 hover:text-slate-900"
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden">
+            <div className="px-2 pt-2 pb-3 space-y-1 border-t border-slate-200">
+              <a href="#home" className="block px-3 py-2 text-slate-700 hover:text-emerald-600 font-medium">
+                Home
+              </a>
+              <a href="#about" className="block px-3 py-2 text-slate-700 hover:text-emerald-600 font-medium">
+                About
+              </a>
+              <a href="#contact" className="block px-3 py-2 text-slate-700 hover:text-emerald-600 font-medium">
+                Contact Us
+              </a>
+              
+              {user ? (
+                <div className="pt-4 pb-3 border-t border-slate-200">
+                  <div className="flex items-center px-3 mb-3">
+                    <img 
+                      src={user.avatar} 
+                      alt={user.name}
+                      className="w-10 h-10 rounded-full"
+                    />
+                    <div className="ml-3">
+                      <div className="text-base font-medium text-slate-800">{user.name}</div>
+                      <div className="text-sm text-slate-500">{user.email}</div>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={onLogout}
+                    variant="outline"
+                    size="sm"
+                    className="mx-3 w-auto"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sign Out
+                  </Button>
+                </div>
+              ) : (
+                <div className="pt-4 pb-3 border-t border-slate-200">
+                  <Button
+                    onClick={handleLogin}
+                    className="mx-3 bg-gradient-to-r from-emerald-500 to-sky-500 hover:from-emerald-600 hover:to-sky-600 text-white"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Sign in with Google
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+};
+
+export default Navbar;
