@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import Navbar from './components/Navbar';
 import AboutSection from './components/AboutSection';
@@ -9,6 +9,7 @@ import CareerCard from './components/CareerCard';
 import { Button } from './components/ui/button';
 import { ArrowLeft, Compass, Sparkles } from 'lucide-react';
 import { Toaster } from './components/ui/toaster';
+import authService from './services/authService';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -22,6 +23,27 @@ function App() {
   const [error, setError] = useState(null);
   const [user, setUser] = useState(null);
   const [currentSection, setCurrentSection] = useState('home');
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+
+  useEffect(() => {
+    initializeAuth();
+  }, []);
+
+  const initializeAuth = async () => {
+    setIsAuthLoading(true);
+    
+    try {
+      // Check for existing session
+      const user = await authService.getCurrentUser();
+      if (user) {
+        setUser(user);
+      }
+    } catch (error) {
+      console.error('Failed to get current user:', error);
+    }
+    
+    setIsAuthLoading(false);
+  };
 
   const handleInputChange = (input) => {
     setCurrentInput(input);
