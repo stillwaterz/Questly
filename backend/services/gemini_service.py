@@ -73,33 +73,31 @@ For each career path, create a detailed analysis with the following sections:
 **Response Format:**
 Return your response as a valid JSON array with exactly this structure:
 
-```json
 [
-  {
+  {{
     "id": "unique-id-1",
     "title": "Career Title",
-    "persona": {
+    "persona": {{
       "title": "Meet Your Future Self",
       "description": "Detailed persona story with name, company, age, and specific achievements"
-    },
-    "dayInLife": {
+    }},
+    "dayInLife": {{
       "title": "A Day in Your Life", 
       "description": "Hour-by-hour detailed schedule of a typical workday"
-    },
-    "weekendQuest": {
+    }},
+    "weekendQuest": {{
       "title": "Your Weekend Quest",
       "description": "Specific actionable project for this weekend with clear steps"
-    },
-    "realityCheck": {
+    }},
+    "realityCheck": {{
       "title": "The Reality Check",
       "description": "Honest assessment of challenges, requirements, and expectations"
-    },
+    }},
     "skills": ["Skill 1", "Skill 2", "Skill 3", "Skill 4"],
     "timeToMastery": "X-Y years",
     "averageSalary": "$X,XXX - $X,XXX"
-  }
+  }}
 ]
-```
 
 Generate 2-3 career paths that best match the user's interests. Make each one distinct and compelling.
 """
