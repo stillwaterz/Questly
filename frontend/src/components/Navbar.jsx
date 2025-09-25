@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Menu, X, User, LogOut } from 'lucide-react';
 
-const Navbar = ({ user, onLogin, onLogout }) => {
+const Navbar = ({ user, onLogin, onLogout, currentSection, onSectionChange }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogin = () => {
@@ -15,13 +15,21 @@ const Navbar = ({ user, onLogin, onLogout }) => {
     onLogin(mockUser);
   };
 
+  const handleNavClick = (section) => {
+    onSectionChange(section);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <nav className="bg-white border-b border-slate-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <div className="flex-shrink-0 flex items-center">
+            <button 
+              onClick={() => handleNavClick('home')}
+              className="flex-shrink-0 flex items-center"
+            >
               <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-sky-500 rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-lg">Q</span>
               </div>
@@ -31,20 +39,41 @@ const Navbar = ({ user, onLogin, onLogout }) => {
                 </span>
                 <div className="text-xs text-slate-500 -mt-1">Career Discovery for Africa</div>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#home" className="text-slate-700 hover:text-emerald-600 font-medium transition-colors">
+            <button 
+              onClick={() => handleNavClick('home')}
+              className={`font-medium transition-colors ${
+                currentSection === 'home' 
+                  ? 'text-emerald-600 border-b-2 border-emerald-600 pb-1' 
+                  : 'text-slate-700 hover:text-emerald-600'
+              }`}
+            >
               Home
-            </a>
-            <a href="#about" className="text-slate-700 hover:text-emerald-600 font-medium transition-colors">
+            </button>
+            <button 
+              onClick={() => handleNavClick('about')}
+              className={`font-medium transition-colors ${
+                currentSection === 'about' 
+                  ? 'text-emerald-600 border-b-2 border-emerald-600 pb-1' 
+                  : 'text-slate-700 hover:text-emerald-600'
+              }`}
+            >
               About
-            </a>
-            <a href="#contact" className="text-slate-700 hover:text-emerald-600 font-medium transition-colors">
+            </button>
+            <button 
+              onClick={() => handleNavClick('contact')}
+              className={`font-medium transition-colors ${
+                currentSection === 'contact' 
+                  ? 'text-emerald-600 border-b-2 border-emerald-600 pb-1' 
+                  : 'text-slate-700 hover:text-emerald-600'
+              }`}
+            >
               Contact Us
-            </a>
+            </button>
             
             {user ? (
               <div className="flex items-center space-x-3">
@@ -96,15 +125,24 @@ const Navbar = ({ user, onLogin, onLogout }) => {
         {isMobileMenuOpen && (
           <div className="md:hidden">
             <div className="px-2 pt-2 pb-3 space-y-1 border-t border-slate-200">
-              <a href="#home" className="block px-3 py-2 text-slate-700 hover:text-emerald-600 font-medium">
+              <button 
+                onClick={() => handleNavClick('home')}
+                className="block w-full text-left px-3 py-2 text-slate-700 hover:text-emerald-600 font-medium"
+              >
                 Home
-              </a>
-              <a href="#about" className="block px-3 py-2 text-slate-700 hover:text-emerald-600 font-medium">
+              </button>
+              <button 
+                onClick={() => handleNavClick('about')}
+                className="block w-full text-left px-3 py-2 text-slate-700 hover:text-emerald-600 font-medium"
+              >
                 About
-              </a>
-              <a href="#contact" className="block px-3 py-2 text-slate-700 hover:text-emerald-600 font-medium">
+              </button>
+              <button 
+                onClick={() => handleNavClick('contact')}
+                className="block w-full text-left px-3 py-2 text-slate-700 hover:text-emerald-600 font-medium"
+              >
                 Contact Us
-              </a>
+              </button>
               
               {user ? (
                 <div className="pt-4 pb-3 border-t border-slate-200">
