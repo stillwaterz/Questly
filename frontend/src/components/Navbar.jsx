@@ -1,18 +1,20 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
 import { Menu, X, User, LogOut } from 'lucide-react';
+import authService from '../services/authService';
 
 const Navbar = ({ user, onLogin, onLogout, currentSection, onSectionChange }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogin = () => {
-    // Simulate Google OAuth login
-    const mockUser = {
-      name: "Thabo Mthembu",
-      email: "thabo@gmail.com",
-      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face"
-    };
-    onLogin(mockUser);
+    authService.initiateGoogleLogin();
+  };
+
+  const handleLogout = async () => {
+    const success = await authService.logout();
+    if (success) {
+      onLogout();
+    }
   };
 
   const handleNavClick = (section) => {
@@ -79,14 +81,14 @@ const Navbar = ({ user, onLogin, onLogout, currentSection, onSectionChange }) =>
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2">
                   <img 
-                    src={user.avatar} 
+                    src={user.picture} 
                     alt={user.name}
                     className="w-8 h-8 rounded-full"
                   />
                   <span className="text-sm font-medium text-slate-700">{user.name}</span>
                 </div>
                 <Button
-                  onClick={onLogout}
+                  onClick={handleLogout}
                   variant="outline"
                   size="sm"
                   className="flex items-center gap-2"
@@ -148,7 +150,7 @@ const Navbar = ({ user, onLogin, onLogout, currentSection, onSectionChange }) =>
                 <div className="pt-4 pb-3 border-t border-slate-200">
                   <div className="flex items-center px-3 mb-3">
                     <img 
-                      src={user.avatar} 
+                      src={user.picture} 
                       alt={user.name}
                       className="w-10 h-10 rounded-full"
                     />
@@ -158,7 +160,7 @@ const Navbar = ({ user, onLogin, onLogout, currentSection, onSectionChange }) =>
                     </div>
                   </div>
                   <Button
-                    onClick={onLogout}
+                    onClick={handleLogout}
                     variant="outline"
                     size="sm"
                     className="mx-3 w-auto"
