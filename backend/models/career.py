@@ -44,6 +44,7 @@ class CareerPath(BaseModel):
     subjects: Optional[SubjectRecommendations] = None
     institutions: Optional[List[Institution]] = None
     imageUrl: Optional[str] = None
+    videoUrl: Optional[str] = None
     apsExplanation: Optional[str] = None
 
 class CareerAnalysisRequest(BaseModel):
