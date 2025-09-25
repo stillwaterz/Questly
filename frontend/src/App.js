@@ -4,30 +4,42 @@ import VoiceInput from './components/VoiceInput';
 import LoadingAnimation from './components/LoadingAnimation';
 import CareerCard from './components/CareerCard';
 import { Button } from './components/ui/button';
-import { getCareerPathsForInput } from './data/mock';
 import { ArrowLeft, Compass, Sparkles } from 'lucide-react';
+import axios from 'axios';
+
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+const API = `${BACKEND_URL}/api`;
 
 function App() {
   const [currentInput, setCurrentInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [careerPaths, setCareerPaths] = useState([]);
   const [showResults, setShowResults] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleInputChange = (input) => {
     setCurrentInput(input);
+    setError(null);
   };
 
   const handleSubmit = async (input) => {
     setIsProcessing(true);
     setShowResults(false);
+    setError(null);
     
-    // Simulate AI processing time
-    setTimeout(() => {
-      const paths = getCareerPathsForInput(input);
-      setCareerPaths(paths);
-      setIsProcessing(false);
+    try {
+      const response = await axios.post(`${API}/analyze-career`, {
+        userInput: input
+      });
+      
+      setCareerPaths(response.data.careerPaths);
       setShowResults(true);
-    }, 3000);
+    } catch (err) {
+      console.error('Career analysis error:', err);
+      setError(err.response?.data?.detail || 'Failed to analyze career interests. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleStartOver = () => {
@@ -35,6 +47,7 @@ function App() {
     setCareerPaths([]);
     setShowResults(false);
     setIsProcessing(false);
+    setError(null);
   };
 
   return (
