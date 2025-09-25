@@ -89,11 +89,11 @@ For each career path, create a CONCISE analysis with these sections:
 2. **Persona**: Brief inspiring story (2-3 sentences) featuring a Black African professional with a South African name, showing their impact and success
 3. **Day in Life**: Concise description (2-3 sentences) of a typical workday
 4. **Weekend Quest**: Actionable project with a specific YouTube channel or online course link (must include actual working URL)
-5. **Reality Check**: Honest 2-sentence assessment of challenges and salary expectations in South African Rand
+5. **Reality Check**: Honest 2-sentence assessment of challenges and salary expectations in South African Rand (R)
 
 **Important Guidelines:**
 - Use South African names and contexts
-- Include salary ranges in South African Rand (R)
+- Include salary ranges in South African Rand (R) - NO DOLLAR SIGNS
 - Focus on opportunities available in South Africa and Africa
 - Keep responses concise but inspiring
 - Weekend Quest MUST include real YouTube links or course URLs
@@ -119,7 +119,7 @@ For each career path, create a CONCISE analysis with these sections:
     }},
     "realityCheck": {{
       "title": "The Reality Check",
-      "description": "2 sentence honest assessment with SA Rand salary range"
+      "description": "2 sentence honest assessment with SA Rand salary range (R XXX,XXX - R XXX,XXX)"
     }},
     "skills": ["Essential Skill 1", "Essential Skill 2", "Essential Skill 3"],
     "timeToMastery": "X years",
@@ -127,7 +127,7 @@ For each career path, create a CONCISE analysis with these sections:
   }}
 ]
 
-Generate exactly 2 career paths. Keep each section concise but impactful.
+Generate exactly 2 career paths. Keep each section concise but impactful. Use ONLY South African Rand (R) for salaries.
 """
 
     def _parse_gemini_response(self, response_text: str) -> List[Dict[str, Any]]:
@@ -151,6 +151,11 @@ Generate exactly 2 career paths. Keep each section concise but impactful.
                 for field in required_fields:
                     if field not in career:
                         raise ValueError(f"Missing required field: {field}")
+                
+                # Ensure salary is in Rand format
+                if '$' in career['averageSalary']:
+                    # Convert any remaining dollar references to Rand
+                    career['averageSalary'] = career['averageSalary'].replace('$', 'R ')
             
             return career_data
             
