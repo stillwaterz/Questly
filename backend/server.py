@@ -11,7 +11,7 @@ import uuid
 from datetime import datetime
 
 # Import our new models and services
-from models.career import CareerAnalysisRequest, CareerAnalysisResponse
+from models.career import CareerAnalysisRequest, CareerAnalysisResponse, CareerPath
 from services.gemini_service import GeminiService
 
 ROOT_DIR = Path(__file__).parent
