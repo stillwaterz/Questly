@@ -12,9 +12,9 @@ from datetime import datetime
 
 # Import our models and services
 from models.career import CareerAnalysisRequest, CareerAnalysisResponse, CareerPath
-from models.auth import SessionIdRequest, AuthResponse, UserProfile, MentorRequest
+from models.auth import UserRegister, UserLogin, AuthResponse, UserProfile, MentorRequest
 from services.gemini_service import GeminiService
-from services.auth_service import AuthService
+from services.simple_auth_service import SimpleAuthService
 from services.video_service import VideoService
 
 ROOT_DIR = Path(__file__).parent
@@ -28,7 +28,7 @@ db = client[os.environ['DB_NAME']]
 # Initialize services
 try:
     gemini_service = GeminiService()
-    auth_service = AuthService(db)
+    auth_service = SimpleAuthService(db)
     video_service = VideoService()
     logger = logging.getLogger(__name__)
     logger.info("All services initialized successfully")
@@ -71,14 +71,28 @@ async def get_status_checks():
     status_checks = await db.status_checks.find().to_list(1000)
     return [StatusCheck(**status_check) for status_check in status_checks]
 
-# Authentication Routes
-@api_router.post("/auth/session", response_model=AuthResponse)
-async def process_session(request: SessionIdRequest, response: Response):
-    """Process Google OAuth session ID and create user session"""
+# Simple Authentication Routes
+@api_router.post("/auth/register", response_model=AuthResponse)
+async def register_user(request: UserRegister, response: Response):
+    """Register a new user"""
     if not auth_service:
         raise HTTPException(status_code=503, detail="Authentication service unavailable")
     
-    auth_data = await auth_service.process_session_id(request.session_id)
+    auth_data = await auth_service.register_user(request.email, request.password, request.name)
+    auth_service.set_session_cookie(response, auth_data["session_token"])
+    
+    return AuthResponse(
+        session_token=auth_data["session_token"],
+        user=auth_data["user"]
+    )
+
+@api_router.post("/auth/login", response_model=AuthResponse)
+async def login_user(request: UserLogin, response: Response):
+    """Login user with email and password"""
+    if not auth_service:
+        raise HTTPException(status_code=503, detail="Authentication service unavailable")
+    
+    auth_data = await auth_service.login_user(request.email, request.password)
     auth_service.set_session_cookie(response, auth_data["session_token"])
     
     return AuthResponse(

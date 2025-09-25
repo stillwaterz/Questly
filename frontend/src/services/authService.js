@@ -8,28 +8,35 @@ class AuthService {
     this.currentUser = null;
   }
 
-  // Google OAuth login
-  initiateGoogleLogin() {
-    const redirectUrl = `${window.location.origin}/`;
-    const authUrl = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
-    window.location.href = authUrl;
-  }
-
-  // Process session ID from URL fragment
-  async processSessionId(sessionId) {
+  // Register new user
+  async register(email, password, name) {
     try {
-      const response = await axios.post(`${API}/auth/session`, {
-        session_id: sessionId
+      const response = await axios.post(`${API}/auth/register`, {
+        email,
+        password, 
+        name
       });
       
       this.currentUser = response.data.user;
-      
-      // Clean URL fragment
-      window.history.replaceState({}, document.title, window.location.pathname);
-      
       return response.data.user;
     } catch (error) {
-      console.error('Session processing failed:', error);
+      console.error('Registration failed:', error);
+      throw error;
+    }
+  }
+
+  // Login user
+  async login(email, password) {
+    try {
+      const response = await axios.post(`${API}/auth/login`, {
+        email,
+        password
+      });
+      
+      this.currentUser = response.data.user;
+      return response.data.user;
+    } catch (error) {
+      console.error('Login failed:', error);
       throw error;
     }
   }
@@ -56,13 +63,6 @@ class AuthService {
       console.error('Logout failed:', error);
       return false;
     }
-  }
-
-  // Check for session ID in URL fragment
-  checkUrlForSessionId() {
-    const fragment = window.location.hash.substring(1);
-    const params = new URLSearchParams(fragment);
-    return params.get('session_id');
   }
 }
 

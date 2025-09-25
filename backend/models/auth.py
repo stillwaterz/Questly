@@ -1,8 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from typing import Optional
 
-class SessionIdRequest(BaseModel):
-    session_id: str
+class UserRegister(BaseModel):
+    email: EmailStr
+    password: str
+    name: str
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
 
 class AuthResponse(BaseModel):
     session_token: str
